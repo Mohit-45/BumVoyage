@@ -7,9 +7,7 @@ import { buildWater, createShared, createSheetMaterial, RippleRings, sunShadowFr
 import { Hazards } from './hazards.js';
 import { Boat } from './boat.js';
 import { Particles } from './fx.js';
-
-const INTERP_MS = 110;
-const lerpAngle = (a, b, t) => a + wrapAngle(b - a) * t;
+import { SnapshotBuffer } from './snapshots.js';
 
 export class World {
   constructor(canvas) {
@@ -42,7 +40,8 @@ export class World {
     this.boat = null;
     this.halo = null;
     this.rigs = [];
-    this.snaps = [];
+    this.buffer = new SnapshotBuffer();
+    this.drawn = null; // the state drawn last
     this.layout = [];
     this.seatInfo = [];
     this.mySeat = -1;
@@ -130,7 +129,8 @@ export class World {
     this.buildClouds(group, course);
     this.ripples = new RippleRings(group);
     this.particles.clear();
-    this.snaps = [];
+    this.buffer.reset();
+    this.drawn = null;
     this.hint = -1;
     this.snapCamera = true;
   }
@@ -208,49 +208,25 @@ export class World {
   }
 
   push(snap) {
-    snap.recv = performance.now();
-    this.snaps.push(snap);
-    if (this.snaps.length > 40) this.snaps.shift();
-    const prev = this.snaps[this.snaps.length - 2];
+    const prev = this.buffer.latest();
+    this.buffer.push(snap, performance.now());
     if (prev && Math.hypot(snap.x - prev.x, snap.y - prev.y) > 220) this.snapCamera = true;
   }
 
   latest() {
-    return this.snaps[this.snaps.length - 1] ?? null;
+    return this.buffer.latest();
   }
 
+  /** The world as it is drawn now: a little in the past, smoothed over late and bunched-up snapshots. */
   sample(now) {
-    const snaps = this.snaps;
-    if (snaps.length === 0) return null;
-    const last = snaps[snaps.length - 1];
-    const target = now - INTERP_MS;
-    if (target >= last.recv) {
-      const dt = Math.min(0.12, (target - last.recv) / 1000);
-      const moving = last.st === 'running';
-      return {
-        ...last,
-        x: last.x + (moving ? last.vx * dt : 0),
-        y: last.y + (moving ? last.vy * dt : 0),
-        a: last.a + (moving ? last.w * dt : 0),
-      };
-    }
-    if (target <= snaps[0].recv) return snaps[0];
-    for (let i = snaps.length - 2; i >= 0; i--) {
-      const a = snaps[i];
-      if (a.recv > target) continue;
-      const b = snaps[i + 1];
-      if (Math.hypot(b.x - a.x, b.y - a.y) > 220) return b;
-      const t = (target - a.recv) / Math.max(1, b.recv - a.recv);
-      return {
-        ...b,
-        x: lerp(a.x, b.x, t),
-        y: lerp(a.y, b.y, t),
-        a: lerpAngle(a.a, b.a, t),
-        T: lerp(a.T, b.T, t),
-        pos: b.pos.map((p, k) => lerpAngle(a.pos[k] ?? p, p, t)),
-      };
-    }
-    return last;
+    const st = this.buffer.sample(now);
+    if (st) this.drawn = st;
+    return st;
+  }
+
+  /** The server time the world is drawn at, or null until the clock is known. */
+  renderTime() {
+    return this.buffer.renderTime();
   }
 
   setLocalCharge(level) {

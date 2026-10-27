@@ -1,5 +1,6 @@
 import { Net, claimSession, readSession, writeSession } from './net.js';
 import { World } from './scene.js';
+import { clamp } from './gfx.js';
 import { AnimalPreview } from './preview.js';
 import { InputController } from './input.js';
 import { Sfx } from './audio.js';
@@ -75,7 +76,10 @@ class App {
       knob: $('stick-knob'),
       button: $('toot'),
       onStick: (a, m) => this.net.send({ t: 'stick', a, m }, true),
-      onCharge: (on) => this.net.send({ t: 'charge', on }, true),
+      onCharge: (on, level) => {
+        this.net.send({ t: 'charge', on }, true);
+        if (!on) this.predictBurst(level);
+      },
     });
     this.screen = 'home';
     this.me = null;
@@ -88,6 +92,8 @@ class App {
     this.courses = new Map();
     this.mySeat = -1;
     this.racing = false;
+    this.pendingEvents = []; // server events waiting for the drawn world to reach the moment they happened
+    this.predicted = []; // own blasts already shown here, so the server's copy is not shown twice
     this.countdownEnd = 0;
     this.countdownShown = -1;
     this.bannerTimer = 0;
@@ -340,6 +346,8 @@ class App {
   resetToHome(message = '') {
     writeSession(null);
     this.net.clearQueue();
+    this.pendingEvents = [];
+    this.predicted = [];
     this.me = null;
     this.code = null;
     this.phase = 'lobby';
@@ -378,7 +386,7 @@ class App {
     net.on('start', (msg) => this.onStart(msg));
     net.on('go', () => this.onGo());
     net.on('s', (snap) => this.world.push(snap));
-    net.on('ev', (msg) => this.onEvents(msg.list));
+    net.on('ev', (msg) => this.queueEvents(msg));
     net.on('finish', (msg) => this.onFinish(msg));
     net.on('err', (msg) => {
       this.setPending('');
@@ -494,6 +502,8 @@ class App {
       seatInfo[seat] = { name: p ? p.name : 'Crew', color: p ? p.color : '#ccc', animal: p ? p.animal : 'pig', id };
     }
     this.levelIndex = msg.level;
+    this.pendingEvents = [];
+    this.predicted = [];
     this.world.setCourse(this.getCourse(msg.level));
     this.world.setCrew(layout, seatInfo, this.mySeat);
     const me = this.players.find((p) => p.id === this.me);
@@ -551,8 +561,54 @@ class App {
     if (this.mySeat >= 0) this.tip('Tip: the arrow on the boat shows where your blast will push. Too much farting makes your bum sore.', 7000);
   }
 
+  // The world is drawn a little in the past (see snapshots.js), so an event waits until the drawn world reaches the
+  // moment it happened at: a bump is then seen and heard together with the boat hitting the rock.
+  queueEvents(msg) {
+    if (typeof msg.T !== 'number' || this.world.renderTime() === null || document.hidden) {
+      this.onEvents(msg.list);
+      return;
+    }
+    this.pendingEvents.push({ T: msg.T, list: msg.list, queued: performance.now() });
+  }
+
+  flushEvents(now) {
+    const drawn = this.world.renderTime();
+    while (this.pendingEvents.length) {
+      const next = this.pendingEvents[0];
+      if (drawn !== null && next.T > drawn + 0.01 && now - next.queued < 1500) break;
+      this.pendingEvents.shift();
+      this.onEvents(next.list);
+    }
+  }
+
+  // The server's answer to a toot takes a round trip, so a player's own blast (or fizzle) is shown the moment they
+  // let go. The server's matching event is then recognised in onEvents and skipped.
+  predictBurst(level) {
+    const snap = this.world.latest();
+    const drawn = this.world.drawn;
+    if (!this.racing || this.mySeat < 0 || !snap || !drawn || snap.st !== 'running') return;
+    let power = clamp(level, FART.minPower, 1);
+    const gas = snap.gas[this.mySeat] ?? FART.gasMax;
+    if (gas < FART.gasBase + FART.gasPerPower * power) power = (gas - FART.gasBase) / FART.gasPerPower;
+    const ev =
+      power < FART.minPower
+        ? { k: 'fizzle', seat: this.mySeat }
+        : { k: 'burst', seat: this.mySeat, p: Math.round(power * 100) / 100, ang: (drawn.pos[this.mySeat] ?? 0) + drawn.a };
+    this.predicted.push({ k: ev.k, at: performance.now() });
+    this.world.event(ev);
+    if (ev.k === 'burst') this.sfx.toot(ev.p, 1);
+    else this.sfx.fizzle();
+  }
+
   onEvents(list) {
+    const now = performance.now();
+    this.predicted = this.predicted.filter((guess) => now - guess.at < 3000);
     for (const ev of list) {
+      const guessed = ev.seat === this.mySeat ? this.predicted.findIndex((guess) => guess.k === ev.k) : -1;
+      if (guessed >= 0) {
+        this.predicted.splice(guessed, 1); // already shown when the player let go
+        continue;
+      }
       this.world.event(ev);
       const mine = ev.seat === this.mySeat;
       if (ev.k === 'burst') this.sfx.toot(ev.p, mine ? 1 : 0.75);
@@ -624,6 +680,7 @@ class App {
       this.world.setLocalCharge(this.input.chargeLevel());
       this.input.update(this.world.yaw);
       this.updateCountdown(now);
+      this.flushEvents(now);
       this.world.render(now);
       this.updateHud();
     } else if (this.screen === 'lobby') {

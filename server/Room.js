@@ -291,7 +291,8 @@ export class Room {
     } else if (this.phase === 'racing') {
       this.sim.step();
       const events = this.sim.drainEvents();
-      if (events.length) this.broadcast({ t: 'ev', list: events });
+      // T is the simulation time the events happened at, so a client can show them together with the boat
+      if (events.length) this.broadcast({ t: 'ev', T: Math.round(this.sim.time * 1000) / 1000, list: events });
       if (this.sim.status === 'finished') {
         this.finishRace();
         return;

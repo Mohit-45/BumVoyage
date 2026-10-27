@@ -165,9 +165,10 @@ export class InputController {
 
   endCharge() {
     if (!this.charging) return;
+    const level = this.chargeLevel();
     this.charging = false;
     this.button.classList.remove('charging');
-    this.onCharge(false);
+    this.onCharge(false, level);
   }
 
   chargeLevel() {

@@ -131,6 +131,22 @@ test('blasts are ignored during the countdown and work once racing', () => {
   assert.equal(burst.seat, 0);
 });
 
+test('event messages carry the simulation time they happened at, so clients can line them up with the boat', () => {
+  const { room, sockets, players } = makeRoom();
+  room.handle(players[0], { t: 'start' });
+  ticks(room, 3.2);
+  room.handle(players[0], { t: 'charge', on: true });
+  ticks(room, 0.4);
+  const releasedAt = room.sim.time;
+  room.handle(players[0], { t: 'charge', on: false });
+  ticks(room, 0.2);
+  const batches = sockets[1].ofType('ev');
+  assert.ok(batches.length > 0);
+  for (const batch of batches) assert.ok(Number.isFinite(batch.T) && batch.T > 0 && batch.T <= room.sim.time + 1e-9, `T ${batch.T}`);
+  const burst = batches.find((m) => m.list.some((e) => e.k === 'burst'));
+  assert.ok(Math.abs(burst.T - releasedAt) < 0.1, `the blast was released at ${releasedAt}, not ${burst.T}`);
+});
+
 test('joystick input moves only the sender seat and ignores nonsense', () => {
   const { room, players } = makeRoom();
   room.handle(players[0], { t: 'start' });
