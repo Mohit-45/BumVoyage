@@ -1,0 +1,25 @@
+{
+  "name": "bum-voyage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bum Voyage: a co-op round inflatable-boat river race where every animal crew member steers by farting.",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test test/*.test.js",
+    "tune": "node scripts/tune.mjs",
+    "build:vendor": "esbuild scripts/vendor-entry.js --bundle --minify --format=esm --outfile=public/vendor/three.min.js"
+  },
+  "engines": {
+    "node": ">=20 <25"
+  },
+  "dependencies": {
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "puppeteer-core": "^24.43.1",
+    "three": "^0.186.1"
+  }
+}

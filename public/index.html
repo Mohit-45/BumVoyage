@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0f5c7a">
+  <meta name="description" content="Bum Voyage: a co-op round-boat river race where every animal crew member steers by farting.">
+  <title>Bum Voyage</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232e9fcf'/%3E%3Ccircle cx='32' cy='34' r='20' fill='%23b07b45'/%3E%3Ccircle cx='32' cy='34' r='14' fill='%23ffb3c7'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-screen="home">
+  <main id="app">
+    <section id="screen-home" class="screen active">
+      <div class="card">
+        <h1 class="logo">Bum Voyage</h1>
+        <p class="tagline">Co-op boat racing for up to four gassy animals. Everyone steers with their bottom. Nobody is sorry.</p>
+        <noscript><p class="error">Bum Voyage needs JavaScript. Turn it on and reload the page.</p></noscript>
+        <label class="field">
+          <span>Your name</span>
+          <input id="name-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="Captain Gus">
+        </label>
+        <button id="btn-create" class="btn primary" type="button" disabled>Create a room</button>
+        <div class="divider"><span>or join friends</span></div>
+        <form id="join-form" class="join-row">
+          <input id="code-input" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="CODE" aria-label="Room code">
+          <button id="btn-join" class="btn" type="submit" disabled>Join</button>
+        </form>
+        <button id="btn-help" class="link" type="button">How to play</button>
+        <p id="home-error" class="error" role="alert"></p>
+      </div>
+    </section>
+
+    <section id="screen-unsupported" class="screen">
+      <div class="card">
+        <h1 class="logo">Bum Voyage</h1>
+        <div id="unsupported-webgl">
+          <p class="tagline">This is a 3D game and it needs WebGL 2, which this browser is not offering right now.</p>
+          <ul class="rules">
+            <li>Switch on hardware acceleration in your browser settings, then reload.</li>
+            <li>Use an up-to-date Chrome, Edge, Firefox or Safari (Safari 15 or newer).</li>
+            <li>On an iPhone or iPad, open the link in Safari itself: some in-app browsers and Lockdown Mode switch WebGL off.</li>
+          </ul>
+        </div>
+        <div id="unsupported-error" class="hidden">
+          <p class="tagline">Something went wrong while starting the game. Reloading usually fixes it. If it keeps happening, try another browser.</p>
+        </div>
+        <a class="btn primary" href="">Try again</a>
+      </div>
+    </section>
+
+    <section id="screen-lobby" class="screen">
+      <div class="card wide">
+        <div class="lobby-head">
+          <div>
+            <p class="eyebrow">Room code</p>
+            <div id="room-code" class="code">----</div>
+          </div>
+          <div class="lobby-buttons">
+            <button id="btn-copy" class="btn small" type="button">Copy invite link</button>
+            <button id="btn-leave" class="btn small ghost" type="button">Leave</button>
+          </div>
+        </div>
+
+        <label class="field rename">
+          <span>Your name</span>
+          <input id="rename-input" maxlength="14" autocomplete="off" spellcheck="false" placeholder="Captain Gus">
+        </label>
+
+        <h2>Pick your character <span class="hint">tap the preview to make them toot</span></h2>
+        <div class="picker">
+          <canvas id="preview" class="preview" width="240" height="240" aria-label="Animal preview"></canvas>
+          <div class="picker-side">
+            <div id="animal-grid" class="animal-grid"></div>
+            <p id="animal-blurb" class="note small"></p>
+          </div>
+        </div>
+
+        <h2>Crew <span id="crew-count" class="count"></span></h2>
+        <ul id="crew" class="crew"></ul>
+
+        <h2>River</h2>
+        <div id="levels" class="levels"></div>
+        <p id="lobby-note" class="note"></p>
+        <button id="btn-start" class="btn primary" type="button">Start race</button>
+        <button id="btn-help-lobby" class="link" type="button">How to play</button>
+      </div>
+    </section>
+
+    <section id="screen-game" class="screen">
+      <canvas id="stage"></canvas>
+      <div id="hud">
+        <div id="progress" class="progress" aria-label="Race progress">
+          <div id="progress-fill"></div>
+          <div id="progress-ticks"></div>
+          <div id="progress-dot"></div>
+          <div class="progress-flag">&#9873;</div>
+        </div>
+        <div class="hud-top">
+          <div class="avatar-bar">
+            <div id="avatar" class="avatar">&#129409;</div>
+            <div class="hull" title="Shared hull"><div id="hull-fill"></div><div id="hull-text">5/5</div></div>
+          </div>
+          <div class="pill timer-pill"><span class="clock">&#9201;</span><span id="timer" class="timer">0:00.0</span></div>
+          <div class="hud-right">
+            <div class="pill buoy" title="Times sunk"><span class="ring">&#128735;</span><span id="sinks">0</span></div>
+            <button id="btn-mute" class="icon-btn" type="button" aria-label="Toggle sound">Sound on</button>
+          </div>
+        </div>
+        <div id="seat-chip" class="seat-chip">
+          <div id="seat-diagram" class="seat-diagram"></div>
+          <div class="seat-text">
+            <strong id="seat-name"></strong>
+            <span id="seat-hint"></span>
+          </div>
+        </div>
+        <div id="banner" class="banner"></div>
+        <div id="tip" class="tip"></div>
+      </div>
+      <div id="controls" class="controls">
+        <div class="stick-wrap">
+          <div id="stick" class="stick" role="application" aria-label="Move your animal around the boat">
+            <div class="stick-ring"></div>
+            <div id="stick-knob" class="stick-knob"></div>
+          </div>
+          <span class="label">Move</span>
+        </div>
+        <div class="toot-wrap">
+          <div class="meters">
+            <div class="meter" title="Gas"><span class="label">Gas</span><div class="bar"><div id="gas-fill"></div></div></div>
+            <div class="meter" title="Bum heat"><span class="label">Bum</span><div class="bar"><div id="heat-fill"></div></div></div>
+          </div>
+          <button id="toot" class="toot" type="button" aria-label="Hold to charge, release to fart">
+            <span id="toot-label">TOOT</span>
+          </button>
+        </div>
+      </div>
+      <div id="result" class="result hidden">
+        <div class="card">
+          <h2 id="result-title">Finish!</h2>
+          <div id="result-stars" class="stars"></div>
+          <dl class="stats">
+            <div><dt>Time</dt><dd id="result-time"></dd></div>
+            <div><dt>Sunk</dt><dd id="result-sinks"></dd></div>
+            <div><dt>Hits</dt><dd id="result-bumps"></dd></div>
+          </dl>
+          <p id="result-par" class="note"></p>
+          <div id="result-actions" class="result-actions">
+            <button id="btn-next" class="btn primary" type="button">Next river</button>
+            <button id="btn-retry" class="btn" type="button">Retry</button>
+            <button id="btn-lobby" class="btn ghost" type="button">Back to lobby</button>
+          </div>
+          <p id="result-wait" class="note"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="help" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="card">
+      <h2 id="help-title">How to play</h2>
+      <ol class="rules">
+        <li><strong>One round inflatable boat, one crew.</strong> Each player is a character lying on their belly on the boat's rim, bottom hanging out over the water. You can only stand on your own slice: all of it if you play alone, half for two, a third for three, a quarter for four.</li>
+        <li><strong>Move to choose where you lie.</strong> Push the stick toward the part of the boat you want. Your fart pushes the boat the opposite way, so go to the back to go forward. The arrow on the boat shows your push.</li>
+        <li><strong>Hold TOOT to charge, release to fart.</strong> Longer holds are bigger and cost more gas. Gas refills slowly. Keyboard: WASD or arrows to move, Space to toot.</li>
+        <li><strong>Too much farting makes your bum red and sore.</strong> A sore bum makes weaker farts until it cools down. Pace yourself.</li>
+        <li><strong>The river fights back.</strong> Rocks bump you. Spiky urchins, spiked rollers (from the left, the right and straight ahead) and purple spiked rails always hurt. Whirlpools drag you in and flush you out. Waterfalls fling you down and rattle everyone's gas.</li>
+        <li><strong>Share a hull.</strong> The crew has 5 hull points. At zero the boat sinks and restarts from the last flag. Stars: 3 for no sinking, 3 hits or fewer and beating par. 2 for at most one sinking within 1.6 times par. 1 for finishing.</li>
+      </ol>
+      <button id="btn-help-close" class="btn primary" type="button">Got it</button>
+    </div>
+  </div>
+
+  <div class="notices">
+    <div id="reconnect" class="reconnect hidden" role="status">Reconnecting...</div>
+    <div id="toast" class="toast hidden" role="status"></div>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

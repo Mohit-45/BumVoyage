@@ -1,0 +1,37 @@
+{
+  "sources": [
+    {
+      "file": "wet-fart.wav",
+      "title": "Wet fart tummy rumbles (first fart, trimmed)",
+      "author": "natalie",
+      "license": "Public domain",
+      "url": "https://commons.wikimedia.org/wiki/File:Wet_fart_tummy_rumbles.ogg"
+    },
+    {
+      "file": "gastric-distress.wav",
+      "title": "Gastric Distress",
+      "author": "LFA",
+      "license": "CC0",
+      "url": "https://opengameart.org/content/gastric-distress"
+    }
+  ],
+  "clips": [
+    { "file": "wet-fart.wav", "start": 0.0, "end": 0.78, "weight": 4 },
+    { "file": "gastric-distress.wav", "start": 0.06, "end": 1.2, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 2.26, "end": 2.98, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 3.21, "end": 3.62, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 4.58, "end": 5.63, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 6.16, "end": 6.57, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 6.66, "end": 7.66, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 8.37, "end": 8.75, "weight": 2 },
+    { "file": "gastric-distress.wav", "start": 10.37, "end": 10.85, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 11.43, "end": 11.74, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 11.93, "end": 12.35, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 13.3, "end": 13.86, "weight": 2 },
+    { "file": "gastric-distress.wav", "start": 14.71, "end": 15.28, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 16.98, "end": 17.63, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 18.42, "end": 18.96, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 19.42, "end": 19.76, "weight": 1 },
+    { "file": "gastric-distress.wav", "start": 20.09, "end": 20.72, "weight": 1 }
+  ]
+}

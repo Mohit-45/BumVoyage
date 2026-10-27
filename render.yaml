@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: bum-voyage
+    runtime: node
+    plan: free # one instance only: rooms live in memory, so never scale this past 1
+    region: singapore # pick before the first deploy: Render cannot change it afterwards
+    buildCommand: npm ci --omit=dev
+    startCommand: node server/index.js
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
