@@ -14,7 +14,6 @@ const { clamp, smooth } = kit;
 export const FRAME = {
   tubeRadius: 33,
   tubeThickness: 6.4,
-  tubeTopY: 8.6,
   tubeCenterY: -6.4,
   deckY: -5.6,
   deckRadius: 27.8,
@@ -22,7 +21,6 @@ export const FRAME = {
   flangeRadius: 33.4,
   flangeThickness: 3.4,
   waterY: -9.9,
-  padTop: 1.1,
   padHalfWidth: 4.6,
   pawX: 5.4,
   pawY: -3.4,
@@ -67,7 +65,6 @@ export class CharacterRig {
   constructor(spec, build) {
     this.spec = spec;
     this.id = spec.id;
-    this.baseScale = 1;
     this.group = new THREE.Group();
     this.heat = { value: 0 };
     this.glow = { value: 0 };

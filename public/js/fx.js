@@ -52,7 +52,6 @@ export class Particles {
     this.points.frustumCulled = false;
     this.points.renderOrder = 10;
     scene.add(this.points);
-    this.scratch = new THREE.Color();
   }
 
   setScale(heightPx, fovDeg, pixelRatio) {

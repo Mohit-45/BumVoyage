@@ -1,6 +1,6 @@
 import * as THREE from '../../vendor/three.min.js';
 
-export const TAU = Math.PI * 2;
+const TAU = Math.PI * 2;
 export const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 export const lerp = (a, b, t) => a + (b - a) * t;
 export const smooth = (a, b, x) => {
@@ -110,14 +110,6 @@ export function loft({ spine, radii, sides = 10, stations = 12, up = [0, 1, 0], 
   return geometry;
 }
 
-/** A tapered, optionally bent limb between two points (circular cross-sections). */
-export function limb({ from, to, bend = [0, 0, 0], r0 = 2, r1 = 1.8, r2 = 1.6, sides = 8, stations = 8, up = [0, 0, 1], capStart = 'round', capEnd = 'round' }) {
-  const a = V(from);
-  const b = V(to);
-  const mid = a.clone().lerp(b, 0.5).add(V(bend));
-  return loft({ spine: [from, [mid.x, mid.y, mid.z], to], radii: [[r0, r0], [r1, r1], [r2, r2]], sides, stations, up, capStart, capEnd });
-}
-
 /** Low-poly ellipsoid (icosphere). detail 1 = chunky/faceted, 2 = smoother. jitter adds deterministic lumpiness. */
 export function ellipsoid(rx, ry, rz, { detail = 1, jitter = 0, seed = 0 } = {}) {
   const g = new THREE.IcosahedronGeometry(1, detail);
@@ -141,8 +133,8 @@ export function cone(radius, height, sides = 7) {
   return g;
 }
 
-export function cylinder(radius, height, sides = 8, radiusTop = radius) {
-  const g = new THREE.CylinderGeometry(radiusTop, radius, height, sides, 1);
+export function cylinder(radius, height, sides = 8) {
+  const g = new THREE.CylinderGeometry(radius, radius, height, sides, 1);
   g.deleteAttribute('uv');
   return g;
 }
@@ -250,20 +242,4 @@ export function pivot(parent, pos = [0, 0, 0], name = '') {
   if (name) g.name = name;
   parent.add(g);
   return g;
-}
-
-/** Stripes across Z (for zebras): returns 0..1 stripe mask for a position. */
-export function stripe(z, period = 3.2, duty = 0.5, phase = 0) {
-  const f = (((z + phase) / period) % 1 + 1) % 1;
-  return f < duty ? 1 : 0;
-}
-
-/** Distance-based spots: returns 0..1 mask. centers: [[x,y,z,r], ...] */
-export function spots(x, y, z, centers) {
-  let m = 0;
-  for (const [cx, cy, cz, r] of centers) {
-    const d = Math.hypot(x - cx, y - cy, z - cz);
-    m = Math.max(m, 1 - smooth(r * 0.82, r, d));
-  }
-  return m;
 }

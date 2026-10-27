@@ -115,11 +115,12 @@ function gzipped(file, entry) {
   return entry.gz;
 }
 
-// Vendor files are not fingerprinted and audio clips are paired with manifest.json, so
-// nothing is cached for long: our own text revalidates on every load (a cheap 304), while
-// binary assets and the vendored library may be reused for an hour.
-function cacheControl(rel, ext) {
-  return TEXT_TYPES.has(ext) && !rel.startsWith('/vendor/') ? 'no-cache' : 'public, max-age=3600';
+// Files are not fingerprinted and audio clips are paired with manifest.json, so nothing is cached
+// for long: text revalidates on every load (a cheap 304), while binary assets may be reused for an
+// hour. That includes the vendored three.js bundle, which only holds the names our code uses and so
+// has to change together with that code.
+function cacheControl(ext) {
+  return TEXT_TYPES.has(ext) ? 'no-cache' : 'public, max-age=3600';
 }
 
 function acceptsGzip(req) {
@@ -181,7 +182,7 @@ async function serveStatic(req, res) {
     ...headers,
     ETag: etag,
     'Last-Modified': st.mtime.toUTCString(),
-    'Cache-Control': cacheControl(rel, ext),
+    'Cache-Control': cacheControl(ext),
     ...(compressible && { Vary: 'Accept-Encoding' }),
   };
   if (isNotModified(req, etag, st.mtimeMs)) {

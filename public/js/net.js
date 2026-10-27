@@ -80,7 +80,6 @@ export class Net {
     this.handlers = new Map();
     this.queue = [];
     this.attempts = 0;
-    this.rtt = 0;
     this.wantOpen = false;
     this.reconnectTimer = null;
     this.connectTimer = null;
@@ -150,10 +149,7 @@ export class Net {
       } catch {
         return;
       }
-      if (msg.t === 'pong') {
-        this.rtt = Math.round(performance.now() - msg.ts);
-        return;
-      }
+      if (msg.t === 'pong') return;
       this.emit(msg.t, msg);
     });
     ws.addEventListener('close', () => {
@@ -216,7 +212,7 @@ export class Net {
       const now = performance.now();
       this.lastMsgAt = Math.max(this.lastMsgAt, now - DEAD_AFTER_MS + WAKE_PROBE_MS);
       this.lastPingAt = now;
-      this.send({ t: 'ping', ts: now }, true);
+      this.send({ t: 'ping' }, true);
     }
   }
 
@@ -246,7 +242,7 @@ export class Net {
     }
     if (now - this.lastPingAt >= PING_EVERY_MS - 250) {
       this.lastPingAt = now;
-      this.send({ t: 'ping', ts: now }, true);
+      this.send({ t: 'ping' }, true);
     }
     if (this.attempts > 0 && now - this.openedAt > STABLE_MS) this.attempts = 0;
   }

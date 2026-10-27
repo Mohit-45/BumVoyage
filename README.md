@@ -4,7 +4,7 @@ A co-op river race for 1 to 4 players on separate devices. Each player is a cart
 
 ## Characters
 
-The six playable animals are a lion (Leo), a zebra (Zeke), a giraffe (Gerry), a hippo (Hattie), a mouse lemur (Milo) and a ring-tailed lemur king (King Ringo XIII). They are low-poly characters built from simple shapes in `public/js/characters/`. To change them, edit `public/shared/animals.js` (names, emoji, blurbs) and the matching module (see "Characters in code" below). `generic.js` there is a plain starter animal.
+The six playable animals are a lion (Leo), a zebra (Zeke), a giraffe (Gerry), a hippo (Hattie), a mouse lemur (Milo) and a ring-tailed lemur king (King Ringo XIII). They are low-poly characters built from simple shapes in `public/js/characters/`. To change them, edit `public/shared/animals.js` (names, emoji, blurbs) and the matching module (see "Characters in code" below).
 
 ## How to play
 
@@ -74,7 +74,7 @@ Covers the physics and rules (sectors, walking, gas, heat, hull, sinking, every 
 Each character is a module in `public/js/characters/` (`leo.js`, `zeke.js`, `gerry.js`, `hattie.js`, `milo.js`, `ringo.js`) exporting a `spec` and a `build` function. `kit.js` has the shape helpers (lofts, limbs, vertex painting) and `rig.js` turns a build into an animated rig: arms planted on the deck, legs hanging over the water, kick and recoil, squint and tail flick, and the red blush that spreads over the cheeks as the bum gets sore. All characters share the same frame constants so they sit on the rim the same way.
 
 - `node scripts/check-rigs.mjs [id ...]` checks every character in every pose: nothing clips into the tube or deck, hands rest on the deck, feet hang just above the water, the bum is outside the boat, and the mesh and triangle budgets hold.
-- `node scripts/render-sheet.mjs leo --views game,side` renders turnaround sheets to PNG with headless Chrome into `sheets/` (change it with `--out <dir>`). `node scripts/render-sheet.mjs leo --crew leo,zeke,hattie,milo --views cast` shows four characters from the game camera. Pass one character id, or you get one identical file per character. It needs Google Chrome; set `CHROME_PATH` if it is not in the macOS default place. `generic.js` is a plain starter animal to copy when you add a character.
+- `node scripts/render-sheet.mjs leo --views game,side` renders turnaround sheets to PNG with headless Chrome into `sheets/` (change it with `--out <dir>`). `node scripts/render-sheet.mjs leo --crew leo,zeke,hattie,milo --views cast` shows four characters from the game camera. Pass one character id, or you get one identical file per character. It needs Google Chrome; set `CHROME_PATH` if it is not in the macOS default place.
 
 ## Deploy
 
@@ -82,7 +82,7 @@ The repo includes a Render blueprint (`render.yaml`). Push it to GitHub, then in
 
 The per-address limits (connections per address, rooms created per minute) read the first `X-Forwarded-For` hop, and a client can fake that hop. After your first deploy, log the header once, call the app with a made-up `X-Forwarded-For: 1.2.3.4` to see which hop is really yours, and set the `TRUST_PROXY_HOPS` environment variable to the number of hops Render appends. Leave it unset until you have checked: with too small a number every visitor would share one address.
 
-The 3D library is bundled into `public/vendor/three.min.js` and committed, so deploys need no build step. To rebuild it after upgrading three.js, run `npm install` then `npm run build:vendor`.
+The 3D library is bundled into `public/vendor/three.min.js` and committed, so deploys need no build step. It holds only the three.js names the code uses (`scripts/build-vendor.mjs` finds them by scanning the sources), which makes it about a fifth smaller. After upgrading three.js, or after using a new `THREE.Name` anywhere, run `npm ci` then `npm run build:vendor` and commit the result; a test fails until you do.
 
 ## How it works
 

@@ -19,7 +19,7 @@ renderer.setSize(width, height, false);
 renderer.setPixelRatio(1);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 canvas.style.width = `${width}px`;
 canvas.style.height = `${height}px`;
 

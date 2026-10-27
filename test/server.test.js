@@ -406,7 +406,7 @@ test('static files are gzipped, validated with an ETag, and answered with 304', 
     assert.equal(res.status, 304);
     assert.equal(res.body.length, 0);
     assert.equal(res.headers.etag, etag);
-    assert.equal(res.headers['cache-control'], 'public, max-age=3600');
+    assert.equal(res.headers['cache-control'], 'no-cache');
     assert.match(res.headers['content-security-policy'], /frame-ancestors/);
   }
   const stale = await request(app.port, { path: '/vendor/three.min.js', headers: { 'If-None-Match': '"nope"' } });
@@ -432,7 +432,7 @@ test('static files are gzipped, validated with an ETag, and answered with 304', 
   assert.equal(head.headers['content-encoding'], 'gzip');
 });
 
-test('html always revalidates, vendor and audio may be reused for an hour, and audio is not gzipped', async (t) => {
+test('text and the vendored library always revalidate, audio may be reused for an hour, and audio is not gzipped', async (t) => {
   const app = await startServer(0);
   t.after(() => app.close());
   const gz = { 'Accept-Encoding': 'gzip' };
@@ -445,8 +445,9 @@ test('html always revalidates, vendor and audio may be reused for an hour, and a
     assert.equal(res.status, 200, file);
     assert.equal(res.headers['cache-control'], 'no-cache', file);
   }
+  // the bundle only holds the names the code uses, so a stale copy would break a newer page
   const vendor = await request(app.port, { path: '/vendor/three.min.js', headers: gz });
-  assert.equal(vendor.headers['cache-control'], 'public, max-age=3600');
+  assert.equal(vendor.headers['cache-control'], 'no-cache');
 
   const wav = await request(app.port, { path: '/audio/wet-fart.wav', headers: gz });
   assert.equal(wav.status, 200);
@@ -620,7 +621,7 @@ test('a failed resume keeps the error shape the client expects', async (t) => {
   c.ws.close();
 });
 
-test('shutdown tells players, closes their sockets and stops the server', async (t) => {
+test('shutdown tells players, closes their sockets and stops the server', async () => {
   const app = await startServer(0);
   const c = connect(app.port);
   await c.opened;

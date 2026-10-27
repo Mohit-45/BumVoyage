@@ -60,7 +60,6 @@ const COL = {
   cream: '#f5dca3',
   maneUnder: '#8f3f14',
   maneBase: '#b3561b',
-  maneTip: '#dc8a2e',
   tuft: '#6a3412',
   earIn: '#d98f45',
   crease: '#b9702a',
@@ -635,7 +634,7 @@ export function build(rig, kit) {
       const teeth = strip(teethXs, (x) => lipY(x), (x) => lipY(x) - Math.min(openAt(x) * 0.95, 0.78), 3, (x, t) => teethC0.clone().lerp(teethC1, t), 0.5);
       kit.add(face, teeth, mats.matte, { name: 'teeth' });
 
-      const tube = (pts, r, name, taper = 0.5, color = '#3a1810') => {
+      const tube = (pts, r, name, taper = 0.5) => {
         const spine = pts.filter(Boolean);
         if (spine.length < 3) return;
         // thickest in the middle, tapering to a fine point at both ends
@@ -644,7 +643,7 @@ export function build(rig, kit) {
           return [k, k];
         });
         const g = kit.loft({ spine, radii, sides: 5, stations: Math.max(8, spine.length * 2), up: [0, 1, 0] });
-        kit.paint(g, color);
+        kit.paint(g, '#3a1810');
         kit.add(face, g, mats.matte, { name });
       };
       // upper-lip line, curling up at both corners into little cheek creases; it ends exactly at the

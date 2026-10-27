@@ -369,8 +369,9 @@ export function build(rig, kit) {
   // Big, round ears set on the top corners of the skull and turned well out to the sides, so the bright-pink insides face
   // forward and out and the round furry backs read as big discs from behind. Each has a chunky faceted fur rim standing
   // proud of the pink bowl, so it never reads as a flat disc.
-  const earOutline = (rx, ry, cy, n = 10) => Array.from({ length: n }, (_, i) => {
-    const a = (i / n) * PI * 2 + PI / n;
+  const EAR_SIDES = 10;
+  const earOutline = (rx, ry, cy) => Array.from({ length: EAR_SIDES }, (_, i) => {
+    const a = (i / EAR_SIDES) * PI * 2 + PI / EAR_SIDES;
     return [rx * sin(a) * (0.9 + 0.1 * (cos(a) + 1) * 0.5), cy + ry * cos(a)];
   });
   const earRx = 4.3;

@@ -9,7 +9,6 @@ const course = new Course(LEVELS[levelIdx]);
 const sim = new Simulation(course, seats);
 const pilot = new Autopilot(sim);
 const hits = new Map();
-let lastHull = sim.hull;
 while (sim.status !== 'finished' && sim.time < maxT) {
   pilot.step();
   for (const ev of sim.events) {
@@ -26,7 +25,7 @@ for (const [k, v] of sorted) {
   const s = Number(k.split(':')[0]);
   const near = [];
   const within = (a) => Math.abs(a - s) < 220;
-  course.rocks.filter((r) => within(r.s)).forEach((r) => near.push('rock'));
+  course.rocks.filter((r) => within(r.s)).forEach(() => near.push('rock'));
   course.spikeFields.filter((r) => within(r.s)).forEach(() => near.push('urchins'));
   // A barrel from ahead rolls over the whole stretch between its far and near ends.
   course.rollers.filter((r) => (r.mode === 'top' ? s > r.s - 100 && s < r.s + r.travel + 140 : within(r.s))).forEach((r) => near.push(`roller-${r.mode}`));

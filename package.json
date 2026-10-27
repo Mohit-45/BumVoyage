@@ -9,7 +9,7 @@
     "dev": "node --watch server/index.js",
     "test": "node --test test/*.test.js",
     "tune": "node scripts/tune.mjs",
-    "build:vendor": "esbuild scripts/vendor-entry.js --bundle --minify --format=esm --outfile=public/vendor/three.min.js"
+    "build:vendor": "node scripts/build-vendor.mjs"
   },
   "engines": {
     "node": ">=20 <25"

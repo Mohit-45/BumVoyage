@@ -234,7 +234,7 @@ export class Simulation {
     this.addSpin(HAZARD.FLUSH_SPIN);
     for (const seat of this.seats) seat.gas = Math.max(0, seat.gas - HAZARD.WHIRL_GAS_LOSS);
     this.events.push({ k: 'flush', x: round(this.x, 0), y: round(this.y, 0) });
-    this.hurt(false, this.x, this.y, 'ouch');
+    this.hurt(this.x, this.y, 'ouch');
   }
 
   collide() {
@@ -340,10 +340,10 @@ export class Simulation {
       this.thud(speed, x, y);
       return;
     }
-    this.hurt(harm, x, y, harm ? (kind === 'spiked' ? 'spiked' : 'ouch') : 'bump', speed);
+    this.hurt(x, y, harm ? (kind === 'spiked' ? 'spiked' : 'ouch') : 'bump', speed);
   }
 
-  hurt(harm, x, y, kind, speed = 160) {
+  hurt(x, y, kind, speed = 160) {
     if (this.invuln > 0 && kind !== 'ouch') return;
     this.hull -= 1;
     this.bumps += 1;

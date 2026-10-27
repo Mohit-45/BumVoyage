@@ -246,7 +246,7 @@ export class Room {
         if (isHost && this.phase !== 'lobby') this.toLobby();
         break;
       case 'ping':
-        send(player.ws, JSON.stringify({ t: 'pong', ts: msg.ts }));
+        send(player.ws, JSON.stringify({ t: 'pong' }));
         break;
       default:
         break;

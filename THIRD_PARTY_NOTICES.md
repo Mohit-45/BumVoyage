@@ -2,7 +2,7 @@
 
 ## three.js
 
-Bundled into `public/vendor/three.min.js` together with `RoomEnvironment` and `BufferGeometryUtils` from its examples (built from `scripts/vendor-entry.js`).
+Bundled into `public/vendor/three.min.js` together with `RoomEnvironment` and `BufferGeometryUtils` from its examples, cut down to the parts the game uses (built by `scripts/build-vendor.mjs`).
 
 ```
 The MIT License

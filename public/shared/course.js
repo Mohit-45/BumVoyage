@@ -31,10 +31,6 @@ const RESPAWN_FALL_ROOM = 150;
 const clampCurve = (k, max) => Math.min(max, Math.max(-max, k));
 
 export const HAZARD = {
-  SPIKE_RADIUS,
-  ROLLER_RADIUS,
-  WHIRL_RADIUS,
-  WHIRL_CORE,
   FALL_ACCEL,
   WHIRL_SWIRL: 60,
   WHIRL_PULL: 48,

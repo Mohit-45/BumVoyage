@@ -5,7 +5,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import * as THREE from '../public/vendor/three.min.js';
+import { usedNames } from '../scripts/build-vendor.mjs';
 import { startServer } from '../server/app.js';
 
 const root = process.env.REPO_ROOT ?? path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -29,22 +29,23 @@ test('render.yaml starts the same server as npm start, on a health path the serv
   for (const dep of ['three', 'esbuild', 'puppeteer-core']) assert.ok(!pkg.dependencies[dep], `${dep} must stay a devDependency`);
 });
 
-test('every THREE.* name the browser code uses is exported by the committed bundle', () => {
-  const used = new Set();
-  for (const f of walk('public/js')) for (const m of read(f).matchAll(/\bTHREE\.([A-Za-z0-9_]+)/g)) used.add(m[1]);
-  assert.ok(used.size > 20);
-  assert.deepEqual([...used].filter((n) => !(n in THREE)), []);
+test('the committed three.js bundle exports exactly the names the code uses', async () => {
+  const used = usedNames(root);
+  assert.ok(used.length > 20);
+  // a dynamic import, so this file is not itself counted as a user of the bundle
+  const bundle = await import('../public/vendor/three.min.js');
+  assert.deepEqual(Object.keys(bundle).sort(), used, 'public/vendor/three.min.js is out of date: run npm run build:vendor');
 });
 
-test('the committed three.js bundle is what npm run build:vendor would produce', (t) => {
-  const esbuild = path.join(root, 'node_modules', '.bin', 'esbuild');
-  if (!existsSync(esbuild)) return t.skip('devDependencies not installed');
+test('the committed three.js bundle is what npm run build:vendor would produce', async (t) => {
+  if (!existsSync(path.join(root, 'node_modules', 'esbuild'))) return t.skip('devDependencies not installed');
   const out = path.join(os.tmpdir(), `three-${process.pid}.js`);
-  execFileSync(esbuild, ['scripts/vendor-entry.js', '--bundle', '--minify', '--format=esm', `--outfile=${out}`, '--log-level=error'], { cwd: root });
-  assert.ok(readFileSync(out).equals(readFileSync(path.join(root, 'public/vendor/three.min.js'))), 'public/vendor/three.min.js is stale: run npm run build:vendor');
-  const rev = JSON.parse(read('node_modules/three/package.json')).version.split('.')[1];
-  assert.equal(THREE.REVISION, rev);
-  assert.match(read('public/vendor/three.min.js'), /@license[\s\S]*MIT/, 'the three.js MIT notice must survive minification');
+  execFileSync(process.execPath, ['scripts/build-vendor.mjs', '--out', out], { cwd: root });
+  const committed = readFileSync(path.join(root, 'public/vendor/three.min.js'));
+  assert.ok(readFileSync(out).equals(committed), 'public/vendor/three.min.js is stale: run npm run build:vendor');
+  const { REVISION } = await import('../public/vendor/three.min.js');
+  assert.equal(REVISION, JSON.parse(read('node_modules/three/package.json')).version.split('.')[1]);
+  assert.match(committed.toString(), /@license[\s\S]*MIT/, 'the three.js MIT notice must survive minification');
 });
 
 test('every sound clip points at a real file, inside its length, with a credit', () => {

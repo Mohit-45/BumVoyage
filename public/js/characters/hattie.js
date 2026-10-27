@@ -11,11 +11,6 @@ import * as THREE from '../../vendor/three.min.js';
  * about 60% as wide as the thigh) ending in big toe-out feet just above the water. Everything is built from bold,
  * low-sided lofts (flat top, flat belly, chamfered corners) so the faceting is a few big planes; every
  * marking is a vertex colour.
- *
- * Round 3 refinements: brows sunk onto the lids and damped when she strains, mitts out beside the jaw, tapered legs with a
- * closed crotch (no pad showing through), a smaller tail in the cleft's shadow colour, buttocks that curl under into the
- * thighs, thicker ears tipped back to show their pink, a pink lip rim on the muzzle, a greyer blue, and a bum that
- * widens as she charges.
  */
 export const spec = {
   id: 'hattie',
@@ -61,8 +56,8 @@ function sat(hex, k) {
   return `#${ch.map((v) => Math.round(Math.max(0, Math.min(255, grey + (v - grey) * k))).toString(16).padStart(2, '0')).join('')}`;
 }
 
-// The skin is a blue-grey #8f93c7: the periwinkle of the earlier passes is pulled about 10% toward grey on the
-// sides and on top; the darker back and the pale belly keep their contrast.
+// The skin is a blue-grey #8f93c7: the sides and the top are pulled about 10% toward grey; the darker back and the
+// pale belly keep their contrast.
 const C = {
   side: sat('#8489ca', 0.88),
   back: sat('#7176b8', 0.94),
@@ -637,7 +632,7 @@ export function build(rig, kit) {
   })();
 
   const pupilMat = rig.plain('#15151c', { roughness: 0.5 });
-  for (const [eye, sign, lid] of [[parts.eyeL, -1, lidL], [parts.eyeR, 1, lidR]]) {
+  for (const [eye, lid] of [[parts.eyeL, lidL], [parts.eyeR, lidR]]) {
     kit.add(eye, kit.ellipsoid(1.45, 1.48, 1.35, { detail: 2 }), mats.eyeWhite, { name: 'eyeWhite' });
     // dark pupils glance to one side (the same way in both eyes: a sly side-eye), tucked under the lid
     kit.add(eye, kit.ellipsoid(0.74, 0.78, 0.45, { detail: 2 }), pupilMat, { pos: eyeDir(0.3, -0.23, -1.06), rot: [EYE_TILT, 0, 0], name: 'pupil' });

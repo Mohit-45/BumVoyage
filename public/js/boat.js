@@ -1,7 +1,7 @@
 import * as THREE from '../vendor/three.min.js';
 import { wrapAngle } from '../shared/config.js';
 import { TAU, canvasTexture, lerp } from './gfx.js';
-import { buildAnimal } from './animals3d.js';
+import { buildAnimal } from './characters/index.js';
 
 const TUBE_RADIUS = 33;
 const TUBE_THICKNESS = 6.4;
@@ -126,7 +126,6 @@ export class Boat {
     this.arrow.add(shaft, head);
     this.arrow.position.y = 3.5;
     this.arrow.visible = this.mySeat >= 0;
-    this.arrowMat = arrowMat;
     if (this.mySeat >= 0 && this.seatInfo[this.mySeat]) arrowMat.color.set(this.seatInfo[this.mySeat].color);
     g.add(this.arrow);
   }

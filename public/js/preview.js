@@ -1,6 +1,6 @@
 import * as THREE from '../vendor/three.min.js';
 import { Particles } from './fx.js';
-import { buildAnimal } from './animals3d.js';
+import { buildAnimal } from './characters/index.js';
 import { disposeTree } from './gfx.js';
 
 export class AnimalPreview {

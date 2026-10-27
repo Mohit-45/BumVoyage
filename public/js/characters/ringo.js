@@ -313,7 +313,6 @@ export function build(rig, kit) {
   const rotPQ = (uu, vv, th) => [uu * Math.cos(th) - vv * Math.sin(th), uu * Math.sin(th) + vv * Math.cos(th)];
   const patchGeo = (sign) => {
     const f = patchFrame(sign);
-    const { n } = f;
     const rings = 6;
     const segs = 36;
     const positions = [];

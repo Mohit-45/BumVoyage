@@ -70,7 +70,7 @@
         <h2>Pick your character <span class="hint">tap the preview to make them toot</span></h2>
         <div class="picker">
           <canvas id="preview" class="preview" width="240" height="240" aria-label="Animal preview"></canvas>
-          <div class="picker-side">
+          <div>
             <div id="animal-grid" class="animal-grid"></div>
             <p id="animal-blurb" class="note small"></p>
           </div>
@@ -101,13 +101,13 @@
             <div id="avatar" class="avatar">&#129409;</div>
             <div class="hull" title="Shared hull"><div id="hull-fill"></div><div id="hull-text">5/5</div></div>
           </div>
-          <div class="pill timer-pill"><span class="clock">&#9201;</span><span id="timer" class="timer">0:00.0</span></div>
+          <div class="pill timer-pill"><span>&#9201;</span><span id="timer" class="timer">0:00.0</span></div>
           <div class="hud-right">
             <div class="pill buoy" title="Times sunk"><span class="ring">&#128735;</span><span id="sinks">0</span></div>
             <button id="btn-mute" class="icon-btn" type="button" aria-label="Toggle sound">Sound on</button>
           </div>
         </div>
-        <div id="seat-chip" class="seat-chip">
+        <div class="seat-chip">
           <div id="seat-diagram" class="seat-diagram"></div>
           <div class="seat-text">
             <strong id="seat-name"></strong>
@@ -145,7 +145,7 @@
             <div><dt>Hits</dt><dd id="result-bumps"></dd></div>
           </dl>
           <p id="result-par" class="note"></p>
-          <div id="result-actions" class="result-actions">
+          <div class="result-actions">
             <button id="btn-next" class="btn primary" type="button">Next river</button>
             <button id="btn-retry" class="btn" type="button">Retry</button>
             <button id="btn-lobby" class="btn ghost" type="button">Back to lobby</button>
